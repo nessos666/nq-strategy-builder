@@ -1,6 +1,4 @@
-# NQ Strategy Builder
-
-<div align="center">
+<p align="center">
 
 ```
 ███╗   ██╗ ██████╗     ███████╗████████╗██████╗  █████╗ ████████╗███████╗ ██████╗██╗   ██╗
@@ -13,22 +11,31 @@
 ```
 
 **A systematic, anti-overfitting framework for discovering edge in Nasdaq-100 futures.**
+*Modular building blocks · NLP-driven strategy composition · Walk-forward validation · 60 tests*
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 [![Market](https://img.shields.io/badge/Market-NQ%2FMNQ%20Futures-orange?style=flat-square)](https://www.cmegroup.com)
-[![Framework](https://img.shields.io/badge/Framework-IS%2FOOS%2FHoldout-blue?style=flat-square)]()
-[![Status](https://img.shields.io/badge/Status-Active%20Research-brightgreen?style=flat-square)]()
+[![Tests](https://img.shields.io/badge/Tests-60_suites-brightgreen?style=flat-square)]()
+[![Stars](https://img.shields.io/github/stars/nessos666/nq-strategy-builder?style=social)]()
 
-</div>
+</p>
 
 ---
 
-## The Problem with Most Backtests
+## What is This?
 
-Most traders backtest wrong. They optimize on all available data, get a great-looking equity curve, go live — and lose. The reason: **overfitting**.
+NQ Strategy Builder is a **research framework for algorithmic futures trading** that forces you to test ideas correctly.
 
-This framework enforces a strict research discipline that mirrors how quantitative hedge funds actually work.
+Most traders backtest wrong: optimize on all available data, get a great-looking equity curve, go live — and lose. The reason is **overfitting**.
+
+This framework enforces the same research discipline used by quantitative hedge funds:
+
+1. **Split data into three periods** — IS (train), OOS (validate), Holdout (final verify)
+2. **Describe strategies in plain English** — the NLP parser converts your idea into signal modules
+3. **Search parameter spaces systematically** — Optuna finds combinations, not guesswork
+4. **Grade every result** — S/A/B/C/F tier system based on degradation from IS to OOS
+5. **Reproduce everything** — every run is saved in SQLite with a unique `run_id`
 
 ```bash
 ./sb.py "Fair Value Gap with Order Block in NY session"
@@ -48,7 +55,19 @@ Tier: B  |  Degradation IS→OOS: -14.3%  |  run_id: 247
 
 ---
 
-## The Architecture
+## Why This Exists
+
+I spent years building and testing NQ futures strategies. Most frameworks are either:
+
+- **Too simplistic** — single backtest, no walk-forward, no overfitting checks
+- **Too academic** — complex APIs, steep learning curve, no practical workflow
+- **Black-box** — you don't know what's happening under the hood
+
+This framework is the middle ground: **correct math with a practical CLI**. Type a strategy idea in plain English, get a tier-graded result with IS/OOS/Holdout separation, and know whether your edge is real or just noise.
+
+---
+
+## Architecture
 
 ```
  You type:   "./sb.py 'FVG + OB NY'"
@@ -96,6 +115,19 @@ Tier: B  |  Degradation IS→OOS: -14.3%  |  run_id: 247
            └─────────────────────┘
 ```
 
+### Engine Components (150+ files)
+
+| Component | Files | Purpose |
+|-----------|-------|---------|
+| `sb/engine/` | 9 modules | Parser, knowledge, combinator, evaluator, walk-forward, meta-learner, worker |
+| `sb/cache/` | 4 modules | Signal caching (parquet-based, skip on re-run) |
+| `sb/memory/` | 1 module | SQLite-backed run storage with full reproducibility |
+| `sb/filters/` | 1 module | News/macro event filter |
+| `sb/research/` | 1 module | Entry statistics and analysis |
+| `helfer/` | 9 modules | Cache guard, quality gate, batch pilot, status board |
+| `scripts/` | 18 scripts | Research automation, backfill, param sensitivity, settlement analysis |
+| `tests/` | 60 test files | Full coverage of engine, cache, filters, research |
+
 ---
 
 ## Building Blocks — The DLC System
@@ -121,58 +153,22 @@ Each block does exactly one thing and exposes a single interface. The engine wir
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Pack 1 — Signal Blocks
+### Available Building Blocks
 
-Signal blocks detect market structures and generate binary signals.
+| Pack | Blocks | What They Do |
+|------|--------|-------------|
+| **Signal** | FVG, Order Block, Liquidity Sweep, BOS, MSS, iFVG | Detect market structures and generate binary signals |
+| **Context** | Session Filter, HRL/LRL Regime, Trend, Macro Window, Day-of-Week | Decide *when* the engine is allowed to trade |
+| **Entry** | First Touch, Second Touch, Displacement, CE (50%) | Define *how* to enter a position |
+| **Exit** | ATR Trail, Breakeven, Next Zone, Session Exit | Manage the open trade once in position |
 
-| Block | What it detects | File |
-|-------|----------------|------|
-| Fair Value Gap (FVG) | Imbalance zones between candles | `signals/fvg.py` |
-| Order Block (OB) | Institutional order flow origins | `signals/orderblock.py` |
-| Liquidity Sweep | Stop hunt above/below structure | `signals/sweep.py` |
-| Break of Structure (BOS) | Confirmed trend shift | `signals/bos.py` |
-| Market Structure Shift (MSS) | Aggressive reversal signal | `signals/mss.py` |
-| Inverse FVG (iFVG) | Refilled imbalance becomes support/resistance | `signals/ifvg.py` |
-
-### Pack 2 — Context Blocks
-
-Context blocks act as filters. They don't generate entries — they decide *when* the engine is allowed to trade.
-
-| Block | What it filters | File |
-|-------|----------------|------|
-| Session Filter | NY AM / London / Asia only | `context/session.py` |
-| HRL/LRL Regime | High Resistance / Low Resistance Liquidity | `context/hrl_lrl.py` |
-| Trend Filter | Higher timeframe trend direction | `context/trend.py` |
-| Macro Window | High-volatility news windows | `context/macro.py` |
-| Day-of-Week | Mon-Fri bias filter | `context/day_of_week.py` |
-
-### Pack 3 — Entry Blocks
-
-Entry blocks define *how* to get into a position once signal + context agree.
-
-| Block | Entry logic | File |
-|-------|-------------|------|
-| First Touch | Enter on first price return to zone | `entries/first_touch.py` |
-| Second Touch | Wait for confirmation, enter on 2nd test | `entries/second_touch.py` |
-| Displacement | Enter only after strong directional candle | `entries/displacement.py` |
-| CE (50%) | Enter at the 50% midpoint of a structure | `entries/ce_entry.py` |
-
-### Pack 4 — Exit Blocks
-
-Exit blocks manage the open trade once in position.
-
-| Block | Exit logic | File |
-|-------|-----------|------|
-| ATR Trail | Dynamic trailing stop based on ATR | `exits/atr_trail.py` |
-| Breakeven | Move stop to entry after R:R threshold | `exits/breakeven.py` |
-| Next Zone | Target next FVG/OB level | `exits/next_zone.py` |
-| Session Exit | Close at fixed session end time | `exits/session_exit.py` |
+Each with its own parameter space explored by Optuna during sweep mode.
 
 ---
 
 ## How to Write Your Own Block
 
-Every block follows the same interface — a single function that takes OHLCV bars and returns a boolean Series.
+Every block follows the same interface — a single function that takes OHLCV bars and returns a boolean Series:
 
 ```python
 # building_blocks/signals/your_block.py
@@ -198,9 +194,7 @@ def compute(bars: pd.DataFrame, lookback: int = 20, threshold: float = 0.5) -> p
         Boolean Series — True where condition is active
     """
     result = pd.Series(False, index=bars.index)
-
     # your logic here
-
     return result
 ```
 
@@ -227,15 +221,17 @@ Timeline ───────────────────────�
          │                                         final decision
 ```
 
-**Tier system:**
+### Tier System
 
 | Tier | Criteria | Action |
 |------|----------|--------|
-| S | PF > 2.0, IS→OOS degradation < 10% | Candidate for live |
-| A | PF > 1.6, degradation < 15% | Strong, needs more testing |
-| B | PF > 1.3, degradation < 20% | Promising, keep researching |
-| C | PF > 1.1 | Weak edge, discard |
-| F | PF < 1.1 or OOS fails | No edge, discard |
+| **S** | PF > 2.0, IS→OOS degradation < 10% | Candidate for live |
+| **A** | PF > 1.6, degradation < 15% | Strong, needs more testing |
+| **B** | PF > 1.3, degradation < 20% | Promising, keep researching |
+| **C** | PF > 1.1 | Weak edge, discard |
+| **F** | PF < 1.1 or OOS fails | No edge, discard |
+
+The degradation metric (how much profit factor drops from IS to OOS) is **the real signal**. A strategy with PF 1.8 IS and 1.7 OOS (5.6% degradation) is far more trustworthy than one with 3.0 IS and 1.2 OOS (60% degradation).
 
 ---
 
@@ -255,7 +251,7 @@ pip install -r requirements.txt
 # Run a full parameter sweep
 ./sb.py "FVG" --sweep --trials 50
 
-# Show leaderboard
+# Show leaderboard of all past runs
 ./sb.py --leaderboard
 ```
 
@@ -268,11 +264,57 @@ python >= 3.11
 pandas
 numpy
 optuna
-vectorbt (or your own backtest engine)
 pyarrow
 rich
 loguru
 ```
+
+---
+
+## Project Structure (158 files)
+
+```
+nq-strategy-builder/
+├── sb.py                     # CLI entrypoint
+├── sb/                       # Engine core (37 files)
+│   ├── engine/               #   Parser, combinator, evaluator, walk-forward
+│   ├── cache/                #   Signal caching (parquet-based)
+│   ├── memory/               #   SQLite run storage
+│   ├── filters/              #   News/macro filters
+│   └── research/             #   Entry statistics
+├── building_blocks/          # DLC system
+│   ├── signals/              #   FVG, OB, Sweep, BOS, MSS, iFVG
+│   ├── context/              #   Session, HRL/LRL, Trend, Macro
+│   ├── entries/              #   First/2nd Touch, Displacement, CE
+│   └── exits/                #   ATR Trail, Breakeven, Next Zone, Session
+├── helfer/                   # Support modules (9 files)
+├── scripts/                  # Research automation (18 scripts)
+├── tests/                    # 60 test files
+├── examples/                 # Example building block implementations
+├── docs/                     # Methodology and research docs
+└── Makefile                  # Build and test commands
+```
+
+---
+
+## Testing
+
+```bash
+pytest tests/ -v           # Run all 60 test suites
+./sb.py --validate          # Validate current building blocks
+./sb.py --diagnose          # System health check
+```
+
+---
+
+## Related Projects
+
+Check out the broader ecosystem:
+
+- [quant-tools](https://github.com/nessos666/quant-tools) — OU process MLE, simulation, bias correction
+- [baustein-tester](https://github.com/nessos666/baustein-tester) — Scan and compare signal concepts
+- [tv-watch-agent](https://github.com/nessos666/tv-watch-agent) — CDP-based TradingView automation
+- [api-health-trust-system](https://github.com/nessos666/api-health-trust-system) — API monitoring for algo trading
 
 ---
 
@@ -290,13 +332,7 @@ loguru
 
 MIT — build on it, test your own ideas, publish your results.
 
----
-
-<div align="center">
-
-*Built for systematic NQ futures research.*
-*If you find a block that works — share it.*
-
-**github.com/nessos666**
-
-</div>
+<p align="center">
+  <small>*Built for systematic NQ futures research. 158 files, 60 tests, 0 token costs.*<br>
+  <strong>github.com/nessos666</strong></small>
+</p>
