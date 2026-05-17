@@ -1,0 +1,100 @@
+# ── Virtual Environment ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── Python Cache ─────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Backtest Datenbanken & Ergebnisse ────────────────────────────────────────
+*.db
+output/
+output_v2/
+output_v3/
+output_v3_a/
+output_v3_b/
+output_v3_c/
+output_v3_worker*/
+output_worker_1/
+output_worker_2/
+output_worker_3/
+builder.db
+sb_results.db
+strategie_builder.db
+tmp.db
+
+# ── Marktdaten ───────────────────────────────────────────────────────────────
+data/
+*.parquet
+*.csv
+*.feather
+
+# ── Interne Analyse- und Review-Dokumente ────────────────────────────────────
+research_*.md
+REVIEW_REPORT.md
+
+# ── Private Algo-Bibliothek (nicht öffentlich) ───────────────────────────────
+# Alles ignorieren, aber _research/ Unterordner freigeben
+david_bibliothek/**
+!david_bibliothek/
+!david_bibliothek/*/
+!david_bibliothek/*/_research/
+!david_bibliothek/*/_research/*/
+!david_bibliothek/*/_research/**
+
+# ── Lokale Konfig (enthält absolute Pfade / private Daten) ──────────────────
+knowledge_sources/sources.yaml
+knowledge_sources/sources_holdout.yaml
+
+# ── Operationelle Batch-Scripts & Forschungs-Ideen (privat) ─────────────────
+run_batches_*.sh
+run_recovery_batches.sh
+ideas/
+
+# ── TradingView Kombinatorik Ergebnisse / Sceenshots ─────────────────────────
+tv_kombinatorik_results/
+tv_monitor_screenshots/
+tv_ideen/
+
+# ── PDA Research (privat) ────────────────────────────────────────────────────
+pda_research/
+
+# ── Interne Planungsdokumente & Knowledge Base ──────────────────────────────
+docs/superpowers/
+se_knowledge/
+07_Specs_Plaene/
+
+# ── Virtuelle Environments (alle Namen) ──────────────────────────────────────
+.venv_*/
+
+# ── Notebooks ────────────────────────────────────────────────────────────────
+notebooks/
+.ipynb_checkpoints/
+
+# ── Logs & temporäre Dateien ─────────────────────────────────────────────────
+*.log
+
+# ── Node Modules ─────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Codex / Worktrees ────────────────────────────────────────────────────────
+.codex/
+.worktrees/
+/memory/
+
+# ── Claude Code Instruktionen (projektspezifisch, nicht für externe) ────────
+CLAUDE.md
+
+# ── IDE & System ─────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+pyrightconfig.json
