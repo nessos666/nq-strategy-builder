@@ -42,7 +42,7 @@ def test_on_algo_changed_writes_event(mock_env, tmp_path):
     handler = CacheGuardHandler(sb_path=mock_env, helfer_base=helfer_base)
     event = MagicMock()
     event.src_path = (
-        "/home/boobi/HAUPTLAGER/david_bibliothek/02_FVG_Zonen/fvg_standard.py"
+        "/tmp/david_bibliothek/02_FVG_Zonen/fvg_standard.py"
     )
     event.is_directory = False
     handler.on_modified(event)

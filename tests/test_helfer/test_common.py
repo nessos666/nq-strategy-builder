@@ -88,10 +88,10 @@ def test_read_status_returns_data(helfer_tmp):
 def test_helfer_paths_from_yaml(tmp_path):
     from helfer.common import HelferConfig
 
-    yaml_content = "strategy_builder: /home/boobi/HAUPTLAGER/24_Strategie_Builder\ntradingprojekt: /home/boobi/HAUPTLAGER/05_Strategien_Entwicklung/TRADINGPROJEKT\nhelfer_base: /tmp/test_helfer\n"
+    yaml_content = "strategy_builder: /tmp/strategy_builder\ntradingprojekt: /tmp/tradingprojekt\nhelfer_base: /tmp/test_helfer\n"
     config_file = tmp_path / "helfer.yaml"
     config_file.write_text(yaml_content)
     config = HelferConfig.from_yaml(config_file)
     assert config.strategy_builder == Path(
-        "/home/boobi/HAUPTLAGER/24_Strategie_Builder"
+        "/tmp/strategy_builder"
     )
