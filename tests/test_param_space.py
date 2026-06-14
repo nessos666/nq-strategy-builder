@@ -2,6 +2,7 @@
 """Tests für param_space."""
 
 import pytest
+pytest.importorskip("tv_kombinatorik")
 import optuna
 from tv_kombinatorik.param_space import get_param_space, suggest_params
 
