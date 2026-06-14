@@ -1,8 +1,17 @@
 from __future__ import annotations
 
+import os
 from datetime import datetime, timezone
 
+import pytest
 
+
+def _has_calendar():
+    path = os.path.join(os.path.dirname(__file__), "..", "data", "economic_calendar.csv")
+    return os.path.exists(path)
+
+
+@pytest.mark.skipif(not _has_calendar(), reason="economic_calendar.csv not available")
 def test_nfp_window_blocked():
     """NFP 08:30 ET = 13:30 UTC (Winter). 5-Min-Fenster: 13:25-13:35."""
     from sb.filters.news_filter import is_news_window
