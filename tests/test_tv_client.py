@@ -2,6 +2,7 @@
 """Tests für TVClient DOM-Parser."""
 
 import pytest
+pytest.importorskip("tv_kombinatorik")
 from unittest.mock import MagicMock
 from tv_kombinatorik.tv_client import TVClient
 
