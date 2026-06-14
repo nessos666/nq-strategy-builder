@@ -2,6 +2,7 @@
 """Tests für ResultStore."""
 
 import pytest
+pytest.importorskip("tv_kombinatorik")
 import pandas as pd
 from tv_kombinatorik.result_store import ResultStore
 from tv_kombinatorik.tv_client import TVResult
