@@ -31,7 +31,6 @@ def test_suggest_review_command_exists():
     assert "review" in result.output.lower() or "vorschl" in result.output.lower()
 
 
-@pytest.mark.xfail(reason="CLI refactoring — exit code mismatch, needs deep fix")
 def test_suggest_review_no_pending_exits_cleanly(tmp_path):
     """suggest-review mit leerer pending-Liste laeuft durch ohne Fehler."""
     from typer.testing import CliRunner
@@ -46,7 +45,6 @@ def test_suggest_review_no_pending_exits_cleanly(tmp_path):
     assert "keine" in result.output.lower() or "no" in result.output.lower()
 
 
-@pytest.mark.xfail(reason="CLI refactoring — exit code mismatch, needs deep fix")
 def test_suggest_review_approve_creates_batch_file(tmp_path):
     """Wenn Idee approved wird, entsteht Batch-Datei im approved-Verzeichnis."""
     from typer.testing import CliRunner
@@ -75,7 +73,6 @@ def test_suggest_review_approve_creates_batch_file(tmp_path):
     assert len(content) == 1  # genau eine Idee approved
 
 
-@pytest.mark.xfail(reason="CLI refactoring — exit code mismatch, needs deep fix")
 def test_suggest_review_skip_leaves_pending(tmp_path):
     """Geskinnte Ideen bleiben in der DB als 'pending'."""
     from typer.testing import CliRunner
