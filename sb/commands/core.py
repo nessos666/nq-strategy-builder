@@ -2,6 +2,17 @@
 import typer
 
 
+def _read_ideas(path: "Path") -> "list[str]":
+    """Liest Ideen aus Textdatei. Kommentare (#) und leere Zeilen werden ignoriert."""
+    from pathlib import Path
+    ideas: list[str] = []
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            ideas.append(line)
+    return ideas
+
+
 def register(app) -> None:
     """Register all core commands on the Typer app."""
     from dataclasses import dataclass
@@ -172,16 +183,6 @@ def register(app) -> None:
         winrate: float | None = None
         trades: int | None = None
         error: str = ""
-
-
-    def _read_ideas(path: Path) -> list[str]:
-        """Liest Ideen aus Textdatei. Kommentare (#) und leere Zeilen werden ignoriert."""
-        ideas: list[str] = []
-        for line in path.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line and not line.startswith("#"):
-                ideas.append(line)
-        return ideas
 
 
     def _setup_cache(
