@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pytest
 import pandas as pd
 
 from sb.cache.cache_query import query_signal_bars
