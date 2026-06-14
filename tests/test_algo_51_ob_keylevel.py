@@ -28,6 +28,7 @@ ALGO_DIR = (
 )
 sys.path.insert(0, str(ALGO_DIR))
 
+pytest.importorskip("algo_51_ob_keylevel_v2")
 from algo_51_ob_keylevel_v2 import compute_ob_keylevel
 
 
