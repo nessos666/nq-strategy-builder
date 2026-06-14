@@ -9,16 +9,14 @@ from rich.table import Table
 
 def register(app) -> None:
     """Register all maintenance commands on the Typer app."""
-    from sb.cli import (
-        console,
+    from sb.cli import console
+    from sb._helpers import (
         _backup_db,
         _cleanup_old_studies,
         _print_strategie_baumaschinen_lager,
         _resolve_backtest_data_path,
-        _DEFAULT_SOURCES,
-        DEFAULT_SIGNAL_ALGO_DIRS,
-        resolve_pda_library_dirs,
     )
+    from sb.cli import _DEFAULT_SOURCES, DEFAULT_SIGNAL_ALGO_DIRS, resolve_pda_library_dirs
     from sb.inspect import find_algo_file
     from sb.memory.db import BuilderDB
 
