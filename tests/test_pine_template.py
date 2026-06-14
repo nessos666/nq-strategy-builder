@@ -2,6 +2,7 @@
 """Tests für pine_template."""
 
 import pytest
+pytest.importorskip("tv_kombinatorik")
 from tv_kombinatorik.pine_template import render_pine, load_template
 
 
