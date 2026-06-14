@@ -4,6 +4,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+pytest.importorskip("tv_kombinatorik")
 
 from tv_kombinatorik.runner import KombinatorikRunner
 from tv_kombinatorik.tv_client import TVResult
