@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sb.cli import _read_ideas
+from sb.commands.core import _read_ideas
 
 
 def test_read_ideas_leere_zeilen(tmp_path: Path) -> None:
