@@ -5,6 +5,7 @@ import re
 from unittest.mock import patch
 
 import pytest
+pytest.importorskip("tv_kombinatorik")
 
 from tv_kombinatorik.mcp_bridge import MCPBridge
 from tv_kombinatorik.param_space import get_param_space
