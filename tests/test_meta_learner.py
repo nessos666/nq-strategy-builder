@@ -1,6 +1,6 @@
 from __future__ import annotations
-
 import pytest
+
 
 
 def _make_fake_registry(n_runs: int = 50) -> list[dict]:
