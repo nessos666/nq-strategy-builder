@@ -19,6 +19,10 @@ def register(app) -> None:
         DEFAULT_SIGNAL_ALGO_DIRS,
         resolve_pda_library_dirs,
     )
+    from sb.memory.db import BuilderDB
+    from sb.engine.parser import parse_idea
+    from sb.engine.walk_forward import WalkForwardEngine
+    from sb.report import generate_wf_report
 
     @app.command(name="export-trades")
     def export_trades(
