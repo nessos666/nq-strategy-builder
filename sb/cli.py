@@ -346,14 +346,14 @@ def zone_stats(
 
 
 
-# from sb.commands.core import register as _register_core  # FIXME
+from sb.commands.core import register as _register_core
 from sb.commands.analysis import register as _register_analysis
 from sb.commands.maintenance import register as _register_maintenance
-# from sb.commands.zone_level import register as _register_zone_level  # FIXME
+from sb.commands.zone_level import register as _register_zone_level
 from sb.commands.zeit_atr import register as _register_zeit_atr
 
-# _register_core(app)  # FIXME
+_register_core(app)
 _register_analysis(app)
 _register_maintenance(app)
-# _register_zone_level(app)  # FIXME
+_register_zone_level(app)
 _register_zeit_atr(app)
