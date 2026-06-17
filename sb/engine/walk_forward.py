@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import logging
+import time
 import math
 import warnings
 from pathlib import Path
@@ -170,6 +171,7 @@ class WalkForwardEngine:
         self._storage = storage
 
     def run(self, idea: ParsedIdea, n_trials: int) -> WalkForwardResult:
+        t0 = time.perf_counter()
         """Führt Walk-Forward durch und gibt aggregiertes Ergebnis zurück."""
         all_bars: list[Bar] = self._bridge._bars  # type: ignore[assignment]
         cache_df: pd.DataFrame | None = self._bridge._cache_df
@@ -261,6 +263,8 @@ class WalkForwardEngine:
         avg_importances = _average_importances(all_importances)
         valid_pbos = [p for p in pbo_scores if math.isfinite(p)]
         avg_pbo = sum(valid_pbos) / len(valid_pbos) if valid_pbos else float("nan")
+        elapsed = time.perf_counter() - t0
+        logger.info("Walk-Forward completed: %.1fs", elapsed)
         return WalkForwardResult(
             windows=window_results, importances=avg_importances, pbo_score=avg_pbo
         )
