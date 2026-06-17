@@ -484,3 +484,50 @@ tests/
 
 Total: 523 tests
 ```
+
+---
+
+## Hot Path / Slow Path Separation
+
+Inspired by Jennifer Lewis's [FoxML_Trader_v2](https://github.com/Jennyfirrr/FoxML_Trader_v2) per-core sharded engine architecture.
+
+### Concept
+
+The engine separates fast, per-tick decisions (Hot Path) from slow, analytical computation (Slow Path):
+
+| | Hot Path | Slow Path |
+|---|----------|-----------|
+| **What** | Signal lookup, gate evaluation | Walk-forward, ML inference, parameter optimization |
+| **When** | Every tick | Every N minutes / on parameter change |
+| **Latency** | Microseconds (cache read) | Seconds to minutes |
+| **Writes?** | No (read only) | Yes (updates signal cache) |
+| **Handoff** | Reads from sb/cache/ (Parquet) | Writes to sb/cache/ via SignalCache |
+
+### Current Implementation
+
+```
+HOT PATH (live trading — future):
+  sb/cache/signal_cache.py  <- reads pre-computed signals
+  sb/engine/evaluator.py    <- gate evaluation only
+  NO database access, NO ML inference
+
+SLOW PATH (research — current):
+  sb/engine/walk_forward.py <- IS/OOS/Holdout computation
+  sb/engine/kombinator.py   <- Optuna parameter search
+  sb/memory/db.py           <- SQLite persistence
+  sb/cache/signal_cache.py  <- writes computed signals
+```
+
+### Future: Seqlock Handoff
+
+When live trading is added, the hot path and slow path will communicate through a lock-free double-buffer:
+
+- Producer (Slow Path): Writes new GateParameters when strategy updates
+- Consumer (Hot Path): Reads current parameters on every tick (1 ns steady state)
+- No waiting, no locks, no torn reads.
+
+### The Core Insight
+
+> "The hot path is immune to model complexity." — Jennifer Lewis
+
+Swap the ML model behind the slow path and the hot path's per-tick cost stays identical. This is the architecture that makes live trading feasible without sacrificing research depth.
